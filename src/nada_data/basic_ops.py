@@ -1,56 +1,42 @@
-from typing import List, Union
+from typing import List, Union, Callable
 from nada_dsl import (
     SecretInteger, audit
 )
 from nada_data.nada_array import NadaArray
 
 
-def nada_lt(
-        item: Union[SecretInteger, audit.abstract.SecretInteger],
-        cmp: Union[SecretInteger, audit.abstract.SecretInteger]
-) -> Union[SecretInteger, audit.abstract.SecretInteger]:
+secret_int_types = {SecretInteger, audit.abstract.SecretInteger}
+secret_int = Union[*secret_int_types]
+
+
+def nada_lt(item: secret_int, cmp: secret_int) -> secret_int:
     return (item < cmp).if_else(item, item - item)
 
 
-def nada_lteq(
-        item: Union[SecretInteger, audit.abstract.SecretInteger],
-        cmp: Union[SecretInteger, audit.abstract.SecretInteger]
-) -> Union[SecretInteger, audit.abstract.SecretInteger]:
+def nada_lteq(item: secret_int, cmp: secret_int) -> secret_int:
     return (item <= cmp).if_else(item, item - item)
 
 
-def nada_gt(
-        item: Union[SecretInteger, audit.abstract.SecretInteger],
-        cmp: Union[SecretInteger, audit.abstract.SecretInteger]
-) -> Union[SecretInteger, audit.abstract.SecretInteger]:
+def nada_gt(item: secret_int, cmp: secret_int) -> secret_int:
     return (item > cmp).if_else(item, item - item)
 
 
-def nada_gteq(
-        item: Union[SecretInteger, audit.abstract.SecretInteger],
-        cmp: Union[SecretInteger, audit.abstract.SecretInteger]
-) -> Union[SecretInteger, audit.abstract.SecretInteger]:
+def nada_gteq(item: secret_int, cmp: secret_int) -> secret_int:
     return (item >= cmp).if_else(item, item - item)
 
 
-def nada_eq(
-        item: Union[SecretInteger, audit.abstract.SecretInteger],
-        cmp: Union[SecretInteger, audit.abstract.SecretInteger]
-) -> Union[SecretInteger, audit.abstract.SecretInteger]:
+def nada_eq(item: secret_int, cmp: secret_int) -> secret_int:
     return (item == cmp).if_else(item, item - item)
 
 
-def nada_pubeq(
-        item: Union[SecretInteger, audit.abstract.SecretInteger],
-        cmp: Union[SecretInteger, audit.abstract.SecretInteger]
-) -> Union[SecretInteger, audit.abstract.SecretInteger]:
+def nada_pubeq(item: secret_int, cmp: secret_int) -> secret_int:
     return (item.public_equals(cmp)).if_else(item, item - item)
 
 
 def nada_filter(
-        argument: Union[List[Union[SecretInteger, audit.abstract.SecretInteger]], NadaArray],
-        op: callable,
-        cmp: Union[SecretInteger, audit.abstract.SecretInteger]
+        argument: Union[List[secret_int], NadaArray],
+        op: Callable[[secret_int, secret_int], secret_int],
+        cmp: secret_int
 ) -> NadaArray:
 
     output = NadaArray()
@@ -59,14 +45,20 @@ def nada_filter(
     return output
 
 
-def nada_sum(
-        argument: Union[List[Union[SecretInteger, audit.abstract.SecretInteger]], NadaArray]
-) -> Union[SecretInteger, audit.abstract.SecretInteger]:
+def nada_sum(argument: Union[List[secret_int], NadaArray]) -> secret_int:
+    """
+    Sum an array of SecretInteger objects
+    """
 
     output = argument[0]
     for e in argument[1:]:
-        if type(e) not in {SecretInteger, audit.abstract.SecretInteger}:
+        if type(e) not in secret_int_types:
             raise TypeError(f"all input values must be of type SecretInteger")
         output = output + e
 
     return output
+
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()
