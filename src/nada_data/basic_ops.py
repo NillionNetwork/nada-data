@@ -29,10 +29,6 @@ def nada_eq(item: secret_int, cmp: secret_int) -> secret_int:
     return (item == cmp).if_else(item, item - item)
 
 
-def nada_pubeq(item: secret_int, cmp: secret_int) -> secret_int:
-    return (item.public_equals(cmp)).if_else(item, item - item)
-
-
 def nada_filter(
         argument: Union[List[secret_int], NadaArray],
         op: Callable[[secret_int, secret_int], secret_int],
