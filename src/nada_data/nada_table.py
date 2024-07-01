@@ -8,19 +8,36 @@ class NadaTable:
     def __init__(
             self: NadaTable,
             *columns: str,
-            data: List[NadaArray] = None
+            rows: List[NadaArray] = None
     ):
 
         self.columns = [c for c in columns]
-        self.data = self._set_data(data)
+        self.rows = self._set_data(rows) if rows is not None else []
 
-    def __str__(self: NadaTable):
+    def __str__(self: NadaTable) -> str:
+        """
+        Return a string representation of this NadaTable instance
+
+        >>> arrs = [NadaArray(SecretInteger(i) for i in range(2)), NadaArray(SecretInteger(i + 5) for i in range(2))]
+        >>> NadaTable('a', 'b', rows=arrs)
+        NadaTable(a, b)
+        """
         return f"NadaTable({', '.join([c for c in self.columns])})"
 
-    def __repr__(self: NadaTable):
+    def __repr__(self: NadaTable) -> str:
         return str(self)
 
-    def set_columns(self: NadaTable, columns: List[str]):
+    def set_columns(self: NadaTable, *columns: str) -> NadaTable:
+        """
+        Set the names of the columns for this NadaTable instance. Note that no checking
+        is done to ensure that the number of columns matches the number of elements in
+        each row of the data for this NadaTable instance.
+
+        >>> arrs = [NadaArray(SecretInteger(i) for i in range(2)), NadaArray(SecretInteger(i + 5) for i in range(2))]
+        >>> nt = NadaTable('a', 'b', rows=arrs)
+        >>> nt.set_columns('c', 'd')
+        NadaTable(c, d)
+        """
 
         self.columns = []
         for c in columns:
@@ -32,72 +49,109 @@ class NadaTable:
 
         return self
 
-    def _set_data(self: NadaTable, data: List[NadaArray]):
+    def _set_data(self: NadaTable, data: List[NadaArray]) -> List[NadaArray]:
+        """
+        Perform various checks on incoming data for this NadaTable instance.
 
-        output = []
+        >>> nt = NadaTable('a', 'b')
+        >>> arrs = [NadaArray(SecretInteger(i) for i in range(2)), NadaArray(SecretInteger(i + 5) for i in range(2))]
+        >>> nt._set_data(arrs)
+        [NadaArray(0, 1), NadaArray(5, 6)]
+
+        The number of elements in each row of the incoming data should match the existing number of columns for
+        this instance:
+        >>> nt = NadaTable('a', 'b')
+        >>> arrs = [NadaArray(SecretInteger(i) for i in range(2)), NadaArray(SecretInteger(i + 5) for i in range(3))]
+        >>> nt._set_data(arrs)
+        Traceback (most recent call last):
+          ...
+        ValueError: rows must contain the same number of elements as column list
+
+        All incoming rows should be of type NadaArray:
+        >>> nt = NadaTable('a', 'b')
+        >>> nt._set_data([[i for i in range(2)]])
+        Traceback (most recent call last):
+          ...
+        TypeError: rows must be NadaArray instances
+        """
+
         for d in data:
             if not isinstance(d, NadaArray):
                 raise TypeError("rows must be NadaArray instances")
             if len(d) != len(self.columns):
                 raise ValueError("rows must contain the same number of elements as column list")
-            output.append(d)
-        return output
+        return data
 
-    def set_data(self: NadaTable, data: List[NadaArray]):
-        self.data = self._set_data(data)
-        return self
+    def set_data(self: NadaTable, data: List[NadaArray]) -> NadaTable:
+        """
+        Set the rows parameter for this NadaTable instance
 
-    def get_col_idx(self: NadaTable, col_name: str):
+        >>> nt = NadaTable('a', 'b')
+        >>> arrs = [NadaArray(SecretInteger(i) for i in range(2)), NadaArray(SecretInteger(i + 5) for i in range(2))]
+        >>> nt.set_data(arrs)
+        >>> nt.rows
+        [NadaArray(0, 1), NadaArray(5, 6)]
+        """
+        self.rows = self._set_data(data)
+
+    def get_col_idx(self: NadaTable, col_name: str) -> int:
+        """
+        Get the integer idx for the column with name :col_name:
+
+        >>> nt = NadaTable('a', 'b')
+        >>> nt.get_col_idx('b')
+        1
+        """
         try:
             return self.columns.index(col_name)
         except ValueError:
             raise ValueError(f"column {col_name} not in {self}")
 
     def add_row(self: NadaTable, row: NadaArray):
+        """
+        Add a single row to this NadaTable instance
+
+        >>> nt = NadaTable('a', 'b')
+        >>> nt.add_row(NadaArray(SecretInteger(i) for i in range(2)))
+        >>> nt.rows
+        [NadaArray(0, 1)]
+
+        >>> nt = NadaTable('a', 'b')
+        >>> nt.add_row([SecretInteger(i) for i in range(2)])
+        Traceback (most recent call last):
+          ...
+        TypeError: rows must be NadaArray instances
+
+        >>> nt = NadaTable('a', 'b')
+        >>> nt.add_row(NadaArray(SecretInteger(i) for i in range(3)))
+        Traceback (most recent call last):
+          ...
+        ValueError: input row length must match length of table columns
+        """
+
+        if not isinstance(row, NadaArray):
+            raise TypeError("rows must be NadaArray instances")
         if len(self.columns) != len(row):
             raise ValueError("input row length must match length of table columns")
-        self.data.append(row)
+        self.rows.append(row)
 
     def select(
             self: NadaTable,
-            *args: str
-    ):
+            *cols: str
+    ) -> NadaTable:
+        """
+        Perform basic select operation on this table, returning a new NadaTable with rows
+        consisting of only the specified :cols:
+        """
         return NadaTable(
-            *args,
-            data=[
-                NadaArray(r[i] for i in [self.columns.index(c) for c in args])
-                for r in self.data
+            *cols,
+            rows=[
+                NadaArray(r[i] for i in [self.columns.index(c) for c in cols])
+                for r in self.rows
             ]
         )
 
-    def aggregate(
-            self: NadaTable,
-            key_col: str,
-            agg_col: str,
-            agg_func: Callable[[List[SecretInteger]], NadaTable]
-    ):
 
-        agg_data = {}
-        for r in self.data:
-
-            k = r[self.columns.index(key_col)]
-            v = r[self.columns.index(agg_col)]
-            if k in agg_data:
-                agg_data[k].append(v)
-            else:
-                agg_data[k] = NadaArray(v)
-
-        output_table = NadaTable(key_col, agg_col)
-        for k, v in agg_data.items():
-            output_table.add_row(NadaArray(k, agg_func(v)))
-
-        return output_table
-
-    def join(
-            self: NadaTable,
-            other: NadaTable,
-            key_col: str
-    ):
-
-        k_idx_self = self.columns.index(key_col)
-        k_idx_other = other.columns.index(key_col)
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()

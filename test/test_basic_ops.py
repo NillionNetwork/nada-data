@@ -33,7 +33,7 @@ class TestBasicOps(unittest.TestCase):
         (2, 1, 0),
         (1, 1, 0)
     ])
-    def test_lt(self, first_val, second_val, expected):
+    def test_lt(self, first_val: int, second_val: int, expected: int):
         self.run_test(first_val, second_val, expected, basic_ops.nada_lt)
 
     @parameterized.expand([
@@ -41,7 +41,7 @@ class TestBasicOps(unittest.TestCase):
         (2, 1, 0),
         (1, 1, 1)
     ])
-    def test_lteq(self, first_val, second_val, expected):
+    def test_lteq(self, first_val: int, second_val: int, expected: int):
         self.run_test(first_val, second_val, expected, basic_ops.nada_lteq)
 
     @parameterized.expand([
@@ -49,7 +49,7 @@ class TestBasicOps(unittest.TestCase):
         (2, 1, 2),
         (1, 1, 0)
     ])
-    def test_gt(self, first_val, second_val, expected):
+    def test_gt(self, first_val: int, second_val: int, expected: int):
         self.run_test(first_val, second_val, expected, basic_ops.nada_gt)
 
     @parameterized.expand([
@@ -57,7 +57,7 @@ class TestBasicOps(unittest.TestCase):
         (2, 1, 2),
         (1, 1, 1)
     ])
-    def test_gteq(self, first_val, second_val, expected):
+    def test_gteq(self, first_val: int, second_val: int, expected: int):
         self.run_test(first_val, second_val, expected, basic_ops.nada_gteq)
 
     @parameterized.expand([
@@ -65,7 +65,7 @@ class TestBasicOps(unittest.TestCase):
         (2, 1, 0),
         (1, 1, 1)
     ])
-    def test_eq(self, first_val, second_val, expected):
+    def test_eq(self, first_val: int, second_val: int, expected: int):
         self.run_test(first_val, second_val, expected, basic_ops.nada_eq)
 
 
