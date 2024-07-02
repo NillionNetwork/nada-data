@@ -1,16 +1,17 @@
 import unittest
 import doctest
-from typing import List, Callable
-from nada_dsl import audit, SecretInteger
+from typing import List
+from nada_dsl import SecretInteger
 from parameterized import parameterized
-from nada_data import nada_table, nada_array, basic_ops
+from nada_data.table import nada_table
+from nada_data.array import nada_array
 
 
 def load_tests(loader, tests, ignore):
     """
     This is a special function that is recognized by unittest and can be used to add
     additional tests to a test suite. In this case, we are adding the doctest tests
-    from the nada_table module to this test suite.
+    from the table.nada_table module to this test suite.
     """
     tests.addTests(doctest.DocTestSuite(nada_table))
     return tests

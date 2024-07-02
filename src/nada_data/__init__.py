@@ -1,3 +1,3 @@
-from nada_data.nada_array import NadaArray
-from nada_data.basic_ops import *
-from nada_data.nada_table import *
+from nada_data.array.nada_array import NadaArray
+from nada_data.array import *
+from nada_data.table import *
