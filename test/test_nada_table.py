@@ -3,8 +3,7 @@ import doctest
 from typing import List
 from nada_dsl import SecretInteger
 from parameterized import parameterized
-from nada_data.table import nada_table
-from nada_data.array import nada_array
+from nada_data import nada_array, nada_table
 
 
 def load_tests(loader, tests, ignore):

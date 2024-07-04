@@ -1,6 +1,6 @@
 import unittest
 import doctest
-from nada_data import utils
+from nada_data.functions import utils
 
 
 def load_tests(loader, tests, ignore):

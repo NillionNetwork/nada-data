@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import List
 from nada_dsl import SecretInteger
-from nada_data.array.nada_array import NadaArray
+from nada_data.nada_array import NadaArray
 
 
 class NadaTable:
