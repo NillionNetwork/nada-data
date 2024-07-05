@@ -2,6 +2,7 @@ from __future__ import annotations
 from typing import List
 from nada_dsl import SecretInteger
 from nada_data.nada_array import NadaArray
+from nada_data.functions.table import odd_even_sort
 
 
 class NadaTable:
@@ -10,7 +11,6 @@ class NadaTable:
             *columns: str,
             rows: List[NadaArray] = None
     ):
-
         self.columns = [c for c in columns]
         self.rows = self._set_data(rows) if rows is not None else []
 
@@ -150,6 +150,16 @@ class NadaTable:
                 for r in self.rows
             ]
         )
+
+    def sort_by(
+            self: NadaTable,
+            key_col: str,
+            ascending: bool
+    ):
+        """
+        Sort the rows of this table by :key_col: in either ascending or descending order
+        """
+        odd_even_sort(self.rows, self.get_col_idx(key_col), ascending)
 
 
 if __name__ == "__main__":
