@@ -5,7 +5,7 @@ from nada_dsl import (
 from nada_data.nada_array import NadaArray
 
 
-secret_int_types = {SecretInteger, audit.abstract.SecretInteger}
+secret_int_types = {SecretInteger, audit.SecretInteger}
 secret_int = Union[*secret_int_types]
 
 
@@ -38,4 +38,20 @@ def filter_nada_array(
     output = NadaArray()
     for item in argument:
         output.append(op(item, cmp))
+    return output
+
+
+def nada_max(argument: Union[List[secret_int], NadaArray]) -> secret_int:
+
+    output = argument[0]
+    for i in range(1, len(argument)):
+        output = (output > argument[i]).if_else(output, argument[i])
+    return output
+
+
+def nada_min(argument: Union[List[secret_int], NadaArray]) -> secret_int:
+
+    output = argument[0]
+    for i in range(1, len(argument)):
+        output = (output < argument[i]).if_else(output, argument[i])
     return output

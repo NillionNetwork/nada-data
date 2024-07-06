@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import List
 from nada_dsl import SecretInteger
 from nada_data.nada_array import NadaArray
-from nada_data.functions.table import odd_even_sort
+from nada_data.functions.table import odd_even_sort, aggregate_sum, aggregate_max, aggregate_min
 
 
 class NadaTable:
@@ -160,6 +160,33 @@ class NadaTable:
         Sort the rows of this table by :key_col: in either ascending or descending order
         """
         odd_even_sort(self.rows, self.get_col_idx(key_col), ascending)
+
+    def aggregate_sum(
+            self: NadaTable,
+            key_col: str,
+            agg_col: str
+    ):
+        if key_col == agg_col:
+            raise ValueError(":key_col: and :agg_col: parameters must be distinct")
+        aggregate_sum(self.rows, self.get_col_idx(key_col), self.get_col_idx(agg_col))
+
+    def aggregate_max(
+            self: NadaTable,
+            key_col: str,
+            agg_col: str
+    ):
+        if key_col == agg_col:
+            raise ValueError(":key_col: and :agg_col: parameters must be distinct")
+        aggregate_max(self.rows, self.get_col_idx(key_col), self.get_col_idx(agg_col))
+
+    def aggregate_min(
+            self: NadaTable,
+            key_col: str,
+            agg_col: str
+    ):
+        if key_col == agg_col:
+            raise ValueError(":key_col: and :agg_col: parameters must be distinct")
+        aggregate_min(self.rows, self.get_col_idx(key_col), self.get_col_idx(agg_col))
 
 
 if __name__ == "__main__":

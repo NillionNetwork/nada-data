@@ -6,7 +6,7 @@ from nada_dsl import (
 )
 
 
-secret_int_types = {SecretInteger, audit.abstract.SecretInteger}
+secret_int_types = {SecretInteger, audit.SecretInteger}
 secret_int = Union[*secret_int_types]
 
 

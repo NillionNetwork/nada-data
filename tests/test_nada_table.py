@@ -1,6 +1,6 @@
 import unittest
 import doctest
-from typing import List
+from typing import List, Callable
 from nada_dsl import SecretInteger, audit
 from parameterized import parameterized
 from nada_data import nada_array, nada_table
@@ -20,10 +20,22 @@ def load_tests(loader, tests, ignore):
 class TestNadaTable(unittest.TestCase):
 
     @parameterized.expand([
-        (["a", "b", "c"], ["a", "b"], [[1, 2, 3], [4, 5, 6]], [[1, 2], [4, 5]]),
-        (["a", "b", "c"], ["a", "c"], [[1, 2, 3], [4, 5, 6]], [[1, 3], [4, 6]]),
-        (["a", "b", "c"], ["b"], [[1, 2, 3], [4, 5, 6]], [[2], [5]]),
-        (["a", "b", "c"], ["c"], [[1, 2, 3], [4, 5, 6]], [[3], [6]]),
+        (
+            ["a", "b", "c"], ["a", "b"],
+            [[1, 2, 3], [4, 5, 6]], [[1, 2], [4, 5]]
+        ),
+        (
+            ["a", "b", "c"], ["a", "c"],
+            [[1, 2, 3], [4, 5, 6]], [[1, 3], [4, 6]]
+        ),
+        (
+            ["a", "b", "c"], ["b"],
+            [[1, 2, 3], [4, 5, 6]], [[2], [5]]
+        ),
+        (
+            ["a", "b", "c"], ["c"],
+            [[1, 2, 3], [4, 5, 6]], [[3], [6]]
+        ),
     ])
     def test_select(
             self, cols: list, select_cols: list, input_rows: List[List[int]], expected_rows: List[List[int]]
@@ -84,6 +96,106 @@ class TestNadaTable(unittest.TestCase):
         ]
 
         self.assertEqual(output, expected)
+
+    def run_agg_test(
+            self,
+            input_rows: List[List[int]],
+            cols: List[str],
+            key_col: str,
+            agg_col: str,
+            agg_func: Callable,
+            expected: List[List[int]]
+    ):
+
+        audit.Abstract.initialize(
+            {f"p1_input_{i}_{j}": val for i, row in enumerate(input_rows) for j, val in enumerate(row)}
+        )
+
+        party = audit.Party(name="party")
+        nt = nada_table.NadaTable(
+            *cols,
+            rows=serialize_input_table(input_rows, party, "p1_input_")
+        )
+        agg_func(nt, key_col, agg_col)
+
+        output = [
+            [audit.Output(v, "output", party).value.value for v in nt.rows[i]]
+            for i in range(len(nt.rows))
+        ]
+
+        self.assertEqual(output, expected)
+
+    @parameterized.expand([
+        (
+                [[1, 2], [3, 4], [1, 3], [3, 3]],
+                ["a", "b"], "a", "b",
+                [[1, 0], [1, 5], [3, 0], [3, 7]]
+        ),
+        (
+                [[1, 2], [3, 4], [1, 3], [3, 3]],
+                ["a", "b"], "b", "a",
+                [[1, 2], [0, 3], [4, 3], [3, 4]]
+        ),
+    ])
+    def test_aggregate_sum(
+            self,
+            input_rows: List[List[int]],
+            cols: List[str],
+            key_col: str,
+            agg_col: str,
+            expected: List[List[int]]
+    ):
+        self.run_agg_test(
+            input_rows, cols, key_col, agg_col, nada_table.NadaTable.aggregate_sum, expected
+        )
+
+    @parameterized.expand([
+        (
+                [[1, 2], [3, 4], [1, 3], [3, 3]],
+                ["a", "b"], "a", "b",
+                [[1, 0], [1, 3], [3, 0], [3, 4]]
+        ),
+        (
+                [[1, 2], [3, 4], [1, 3], [3, 3]],
+                ["a", "b"], "b", "a",
+                [[1, 2], [0, 3], [3, 3], [3, 4]]
+        ),
+    ])
+    def test_aggregate_max(
+            self,
+            input_rows: List[List[int]],
+            cols: List[str],
+            key_col: str,
+            agg_col: str,
+            expected: List[List[int]]
+    ):
+        self.run_agg_test(
+            input_rows, cols, key_col, agg_col, nada_table.NadaTable.aggregate_max, expected
+        )
+
+    @parameterized.expand([
+        (
+                [[1, 2], [3, 4], [1, 3], [3, 3]],
+                ["a", "b"], "a", "b",
+                [[1, 0], [1, 2], [3, 0], [3, 3]]
+        ),
+        (
+                [[1, 2], [3, 4], [1, 3], [3, 3]],
+                ["a", "b"], "b", "a",
+                [[1, 2], [0, 3], [1, 3], [3, 4]]
+        ),
+    ])
+    def test_aggregate_min(
+            self,
+            input_rows: List[List[int]],
+            cols: List[str],
+            key_col: str,
+            agg_col: str,
+            expected: List[List[int]]
+    ):
+        self.run_agg_test(
+            input_rows, cols, key_col, agg_col, nada_table.NadaTable.aggregate_min, expected
+        )
 
 
 if __name__ == '__main__':

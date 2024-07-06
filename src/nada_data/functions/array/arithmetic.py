@@ -5,7 +5,7 @@ from nada_dsl import (
 from nada_data.nada_array import NadaArray
 
 
-secret_int_types = {SecretInteger, audit.abstract.SecretInteger}
+secret_int_types = {SecretInteger, audit.SecretInteger}
 secret_int = Union[*secret_int_types]
 
 

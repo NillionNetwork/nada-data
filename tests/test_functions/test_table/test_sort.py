@@ -6,7 +6,7 @@ from nada_data.functions import odd_even_sort
 from tests.utils import serialize_input_table
 
 
-class TestTableOps(unittest.TestCase):
+class TestTableSort(unittest.TestCase):
 
     @parameterized.expand([
         (

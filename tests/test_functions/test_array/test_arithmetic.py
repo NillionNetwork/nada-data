@@ -6,7 +6,7 @@ from nada_data.functions import array
 from tests.utils import serialize_input_array
 
 
-class TestArrayOps(unittest.TestCase):
+class TestArrayArithmetic(unittest.TestCase):
 
     @parameterized.expand([
         ([1, 2, 3], 6),

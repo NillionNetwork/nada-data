@@ -70,7 +70,7 @@ class TestBasicOps(unittest.TestCase):
         self.run_test(first_val, second_val, expected, array.nada_eq)
 
 
-class TestArrayOps(unittest.TestCase):
+class TestArrayFilter(unittest.TestCase):
 
     @parameterized.expand([
         ([1, 2, 3], array.nada_lt, 3, [1, 2, 0]),
@@ -100,6 +100,38 @@ class TestArrayOps(unittest.TestCase):
                 audit.SecretInteger(audit.Input(name="cmp", party=cmp_party))
             )
         ]
+        self.assertEqual(output, expected)
+
+    @parameterized.expand([
+        ([1, 2, 3], 3),
+        ([3, 2, 1], 3),
+        ([4, 1, 3, 2, 5, 6, 5], 6)
+    ])
+    def test_max(self, input_arr: List[int], expected: int):
+
+        audit.Abstract.initialize(
+            {f"p1_input_{i}": input_arr[i] for i in range(len(input_arr))}
+        )
+
+        input_party = audit.Party(name="input_party")
+        party_one_input = serialize_input_array(input_arr, input_party, "p1_input_")
+        output = audit.Output(array.nada_max(party_one_input), "output", input_party).value.value
+        self.assertEqual(output, expected)
+
+    @parameterized.expand([
+        ([1, 2, 3], 1),
+        ([3, 2, 1], 1),
+        ([4, 1, 3, 2, 5, 6, 5], 1)
+    ])
+    def test_min(self, input_arr: List[int], expected: int):
+
+        audit.Abstract.initialize(
+            {f"p1_input_{i}": input_arr[i] for i in range(len(input_arr))}
+        )
+
+        input_party = audit.Party(name="input_party")
+        party_one_input = serialize_input_array(input_arr, input_party, "p1_input_")
+        output = audit.Output(array.nada_min(party_one_input), "output", input_party).value.value
         self.assertEqual(output, expected)
 
 
