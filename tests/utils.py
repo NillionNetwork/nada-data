@@ -39,3 +39,12 @@ def initialize_table_data(prefix: str, arrs: List[List[int]]):
     audit.Abstract.initialize(
         {f"{prefix}{i}_{j}": val for i, row in enumerate(arrs) for j, val in enumerate(row)}
     )
+
+
+def initialize_table_data_multi(inputs: Dict[str, List[List[int]]]):
+    audit.Abstract.initialize({
+        f"{party_name}_{i}_{j}": v
+        for party_name, lst in inputs.items()
+        for i, sublst in enumerate(lst)
+        for j, v in enumerate(sublst)
+    })

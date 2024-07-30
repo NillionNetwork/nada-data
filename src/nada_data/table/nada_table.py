@@ -20,10 +20,24 @@ class NadaTable:
         """
         Return a string representation of this NadaTable instance
         """
-        return f"NadaTable | cols={', '.join(c for c in self.columns)} | rows={len(self._rows)}"
+        cols_str = ",".join(f"'{c}'" for c in self.columns)
+        parties_str = ",".join(sorted([f"'{p.name}'" for p in self._parties]))
+        return f"NadaTable | cols=[{cols_str}] | rows={len(self._rows)} | parties=[{parties_str}]"
 
     def __repr__(self: NadaTable) -> str:
         return str(self)
+
+    def _update_parties(self):
+        """
+        Update the set of all Party values for this instance
+        """
+        return {party for row in self._rows for party in row.get_parties()}
+
+    def _add_parties(self, row: NadaArray):
+        """
+        Add all Party values for some :item: to this instance
+        """
+        self._parties = self._parties | row.get_parties()
 
     def _set_columns(self: NadaTable, *columns: str):
         for c in columns:
@@ -43,6 +57,12 @@ class NadaTable:
         self._set_columns(*columns)
         return self
 
+    def _check_input(self, row: NadaArray):
+        if not isinstance(row, NadaArray):
+            raise TypeError("rows must be NadaArray instances")
+        if len(self.columns) != len(row):
+            raise ValueError("input row length must match length of table columns")
+
     def _set_data(self: NadaTable, data: List[NadaArray]):
         """
         Perform various checks on incoming data for this NadaTable instance.
@@ -54,7 +74,7 @@ class NadaTable:
             if len(d) != len(self.columns):
                 raise ValueError("rows must contain the same number of elements as column list")
             self._rows.append(d)
-            self._parties = self._parties | d.get_parties()
+            self._add_parties(d)
 
     def set_data(self: NadaTable, data: List[NadaArray]) -> NadaTable:
         """
@@ -82,11 +102,24 @@ class NadaTable:
         Add a single row to this NadaTable instance
         """
 
-        if not isinstance(row, NadaArray):
-            raise TypeError("rows must be NadaArray instances")
-        if len(self.columns) != len(row):
-            raise ValueError("input row length must match length of table columns")
+        self._check_input(row)
         self._rows.append(row)
+        self._add_parties(row)
+
+    def __setitem__(self, index: int, row: NadaArray):
+        """
+        Replace value at :index: of self._rows with :item:
+        """
+
+        self._check_input(row)
+        self._rows[index] = row
+        self._update_parties()
+
+    def __getitem__(self, index: int) -> NadaArray:
+        """
+        Return value at :index: from self._rows
+        """
+        return self._rows[index]
 
     def select(
             self: NadaTable,

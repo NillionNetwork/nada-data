@@ -1,10 +1,10 @@
 import unittest
 import doctest
-from typing import List, Callable
+from typing import List, Callable, Dict
 from nada_dsl import audit
 from parameterized import parameterized
-from nada_data.table import nada_table
-from tests.utils import serialize_input_table, initialize_table_data
+from nada_data.table import nada_table, NadaTable
+from tests.utils import serialize_input_table, initialize_table_data, initialize_table_data_multi
 
 
 def load_tests(loader, tests, ignore):
@@ -18,6 +18,44 @@ def load_tests(loader, tests, ignore):
 
 
 class TestNadaTable(unittest.TestCase):
+
+    @parameterized.expand([
+        (
+                ["a", "b", "c"],
+                [[1, 2, 3], [4, 5, 6]],
+                "NadaTable | cols=['a','b','c'] | rows=2 | parties=['party']"
+        )
+    ])
+    def test_create_single_party(self, cols: list, input_rows: List[List[int]], expected_str: str):
+
+        initialize_table_data("p1_input_", input_rows)
+        party = audit.Party(name="party")
+        nt = NadaTable(
+            *cols,
+            rows=serialize_input_table(input_rows, party, "p1_input_")
+        )
+        self.assertEqual(expected_str, str(nt))
+
+    @parameterized.expand([
+        (
+                ["d", "e", "f"],
+                {"party_one": [[1, 2, 3], [3, 2, 1]], "party_two": [[4, 5, 6]]},
+                "NadaTable | cols=['d','e','f'] | rows=3 | parties=['party_one','party_two']"
+        )
+    ])
+    def test_create_multi_party(self, cols: list, inputs: Dict[str, List[List[int]]], expected_str: str):
+
+        initialize_table_data_multi(inputs)
+        tables = [
+            serialize_input_table(
+                inputs[party_name], audit.Party(name=party_name), prefix=f"{party_name}_"
+            ) for party_name in inputs.keys()
+        ]
+        nt = NadaTable(
+            *cols,
+            rows=[row for table in tables for row in table]
+        )
+        self.assertEqual(expected_str, str(nt))
 
     @parameterized.expand([
         (
@@ -43,7 +81,7 @@ class TestNadaTable(unittest.TestCase):
 
         initialize_table_data("p1_input_", input_rows)
         party = audit.Party(name="party")
-        nt = nada_table.NadaTable(
+        nt = NadaTable(
             *cols,
             rows=serialize_input_table(input_rows, party, "p1_input_")
         )
@@ -85,7 +123,7 @@ class TestNadaTable(unittest.TestCase):
 
         initialize_table_data("p1_input_", input_rows)
         party = audit.Party(name="party")
-        nt = nada_table.NadaTable(
+        nt = NadaTable(
             *cols,
             rows=serialize_input_table(input_rows, party, "p1_input_")
         )
@@ -110,7 +148,7 @@ class TestNadaTable(unittest.TestCase):
 
         initialize_table_data("p1_input_", input_rows)
         party = audit.Party(name="party")
-        nt = nada_table.NadaTable(
+        nt = NadaTable(
             *cols,
             rows=serialize_input_table(input_rows, party, "p1_input_")
         )

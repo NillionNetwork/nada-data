@@ -39,7 +39,7 @@ class NadaArray:
         """
         Return a string representation of this instance.
         """
-        parties_str = ", ".join(sorted([f"'{p.name}'" for p in self._parties]))
+        parties_str = ",".join(sorted([f"'{p.name}'" for p in self._parties]))
         return f"NadaArray | len={len(self._data)} | parties=[{parties_str}]"
 
     def __repr__(self):
@@ -91,8 +91,7 @@ class NadaArray:
         """
         Add all Party values for some :item: to this instance
         """
-        for party in item.parties:
-            self._parties.add(party)
+        self._parties = self._parties | set(item.parties)
 
     def get_parties(self):
         return self._parties
@@ -116,7 +115,7 @@ class NadaArray:
         self._data[index] = item
         self._update_parties()
 
-    def __getitem__(self, index: int):
+    def __getitem__(self, index: int) -> secret_int:
         """
         Return value at :index: from self.data
         """
