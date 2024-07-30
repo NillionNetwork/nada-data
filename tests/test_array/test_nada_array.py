@@ -2,8 +2,8 @@ import unittest
 from nada_dsl import audit
 from parameterized import parameterized
 from typing import List, Dict
-from tests.utils import serialize_input_array
-from nada_data.nada_array import NadaArray
+from tests.utils import serialize_input_array, initialize_array_data
+from nada_data.array.nada_array import NadaArray
 
 
 class TestNadaArray(unittest.TestCase):
@@ -18,13 +18,11 @@ class TestNadaArray(unittest.TestCase):
                 "NadaArray | len=6 | parties=['party']"
         )
     ])
-    def test_str_single_party(
+    def test_create_single_party(
             self, input_values: List[int], expected_str: str
     ):
 
-        audit.Abstract.initialize(
-            {f"p1_input_{i}": input_values[i] for i in range(len(input_values))}
-        )
+        initialize_array_data("p1_input_", input_values)
         party = audit.Party(name="party")
         arr = serialize_input_array(input_values, party, "p1_input_")
         self.assertEqual(expected_str, str(arr))
@@ -39,7 +37,7 @@ class TestNadaArray(unittest.TestCase):
                 "NadaArray | len=10 | parties=['partyOne', 'partyThree', 'partyTwo']"
         )
     ])
-    def test_str_multi_party(self, inputs: Dict[str, List[int]], expected_str: str):
+    def test_create_multi_party(self, inputs: Dict[str, List[int]], expected_str: str):
 
         audit.Abstract.initialize({
             f"{party_name}_{i}": inputs[party_name][i]

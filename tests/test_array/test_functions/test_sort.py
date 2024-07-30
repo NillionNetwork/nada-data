@@ -2,7 +2,7 @@ import unittest
 from typing import List
 from nada_dsl import audit
 from parameterized import parameterized
-from nada_data.functions import array
+from nada_data.array import functions
 from tests.utils import serialize_input_array
 
 
@@ -27,7 +27,7 @@ class TestArraySort(unittest.TestCase):
 
         output = [
             audit.Output(v, "output", party).value.value
-            for v in array.sort_nada_array(
+            for v in functions.sort_nada_array(
                 party_one_input,
                 ascending=ascending
             )

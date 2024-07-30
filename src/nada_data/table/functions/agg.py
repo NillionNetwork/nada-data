@@ -2,7 +2,7 @@ from typing import List, Union, Callable
 from nada_dsl import (
     SecretInteger, audit
 )
-from nada_data.functions.table.sort import odd_even_sort
+from nada_data.table.functions.sort import odd_even_sort
 
 secret_int_types = {SecretInteger, audit.SecretInteger}
 secret_int = Union[*secret_int_types]

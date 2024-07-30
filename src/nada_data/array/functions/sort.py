@@ -2,14 +2,13 @@ from typing import List, Union
 from nada_dsl import (
     SecretInteger, audit
 )
-from nada_data.functions import utils
-from nada_data import NadaArray
+from nada_data import utils
 
 secret_int_types = {SecretInteger, audit.SecretInteger}
 secret_int = Union[*secret_int_types]
 
 
-def _compare_exchange(values: Union[List[secret_int], NadaArray], ascending: bool, i: int, j: int):
+def _compare_exchange(values: List[secret_int], ascending: bool, i: int, j: int):
 
     if i >= len(values) or j >= len(values):
         return
@@ -28,7 +27,7 @@ def _compare_exchange(values: Union[List[secret_int], NadaArray], ascending: boo
         values[j] = c
 
 
-def _odd_even_merge(values: Union[List[secret_int], NadaArray], ascending: bool, lo: int, n: int, r: int):
+def _odd_even_merge(values: List[secret_int], ascending: bool, lo: int, n: int, r: int):
 
     m = r * 2
     if m < n:
@@ -44,7 +43,7 @@ def _odd_even_merge(values: Union[List[secret_int], NadaArray], ascending: bool,
         _compare_exchange(values, ascending, lo, lo + r)
 
 
-def _odd_even_sort(values: Union[List[secret_int], NadaArray], ascending: bool, lo: int, n: int):
+def _odd_even_sort(values: List[secret_int], ascending: bool, lo: int, n: int):
     if n > 1:
         m = int(n / 2)
         _odd_even_sort(values, ascending, lo, m)
@@ -53,8 +52,8 @@ def _odd_even_sort(values: Union[List[secret_int], NadaArray], ascending: bool, 
 
 
 def sort_nada_array(
-        values: Union[List[secret_int], NadaArray], ascending: bool = True
-) -> Union[List[secret_int], NadaArray]:
+        values: List[secret_int], ascending: bool = True
+) -> List[secret_int]:
     """
     Sort the contents of :values: in either ascending or descending order
     """

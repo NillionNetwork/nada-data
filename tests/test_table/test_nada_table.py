@@ -1,9 +1,20 @@
 import unittest
+import doctest
 from typing import List, Callable
 from nada_dsl import audit
 from parameterized import parameterized
-from nada_data import nada_table
+from nada_data.table import nada_table
 from tests.utils import serialize_input_table, initialize_table_data
+
+
+def load_tests(loader, tests, ignore):
+    """
+    This is a special function that is recognized by unittest and can be used to add
+    additional tests to a test suite. In this case, we are adding the doctest tests
+    from the utils module to this test suite.
+    """
+    tests.addTests(doctest.DocTestSuite(nada_table))
+    return tests
 
 
 class TestNadaTable(unittest.TestCase):
@@ -30,7 +41,7 @@ class TestNadaTable(unittest.TestCase):
             self, cols: list, select_cols: list, input_rows: List[List[int]], expected_rows: List[List[int]]
     ):
 
-        initialize_table_data(input_rows)
+        initialize_table_data("p1_input_", input_rows)
         party = audit.Party(name="party")
         nt = nada_table.NadaTable(
             *cols,
@@ -41,8 +52,8 @@ class TestNadaTable(unittest.TestCase):
         self.assertEqual(output_table.columns, select_cols)
 
         output = [
-            [audit.Output(v, "output", party).value.value for v in output_table.rows[i]]
-            for i in range(len(nt.rows))
+            [audit.Output(v, "output", party).value.value for v in output_table._rows[i]]
+            for i in range(len(nt._rows))
         ]
         self.assertEqual(output, expected_rows)
 
@@ -72,7 +83,7 @@ class TestNadaTable(unittest.TestCase):
             self, cols: list, key_col: str, ascending: bool, input_rows: List[List[int]], expected: List[List[int]]
     ):
 
-        initialize_table_data(input_rows)
+        initialize_table_data("p1_input_", input_rows)
         party = audit.Party(name="party")
         nt = nada_table.NadaTable(
             *cols,
@@ -81,8 +92,8 @@ class TestNadaTable(unittest.TestCase):
         nt.sort_by(key_col, ascending)
 
         output = [
-            [audit.Output(v, "output", party).value.value for v in nt.rows[i]]
-            for i in range(len(nt.rows))
+            [audit.Output(v, "output", party).value.value for v in nt._rows[i]]
+            for i in range(len(nt._rows))
         ]
 
         self.assertEqual(output, expected)
@@ -97,7 +108,7 @@ class TestNadaTable(unittest.TestCase):
             expected: List[List[int]]
     ):
 
-        initialize_table_data(input_rows)
+        initialize_table_data("p1_input_", input_rows)
         party = audit.Party(name="party")
         nt = nada_table.NadaTable(
             *cols,
@@ -106,8 +117,8 @@ class TestNadaTable(unittest.TestCase):
         agg_func(nt, key_col, agg_col)
 
         output = [
-            [audit.Output(v, "output", party).value.value for v in nt.rows[i]]
-            for i in range(len(nt.rows))
+            [audit.Output(v, "output", party).value.value for v in nt._rows[i]]
+            for i in range(len(nt._rows))
         ]
 
         self.assertEqual(output, expected)

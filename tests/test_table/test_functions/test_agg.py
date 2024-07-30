@@ -1,9 +1,9 @@
 import unittest
 from typing import List, Callable
-from nada_dsl import audit, SecretInteger
+from nada_dsl import audit
 from parameterized import parameterized
-from nada_data.functions import aggregate_sum, aggregate_max, aggregate_min
-from tests.utils import serialize_input_table
+from nada_data.table import functions
+from tests.utils import serialize_input_table, initialize_table_data
 
 
 class TestTableAgg(unittest.TestCase):
@@ -17,10 +17,7 @@ class TestTableAgg(unittest.TestCase):
             expected: List[List[int]]
     ):
 
-        audit.Abstract.initialize(
-            {f"p1_input_{i}_{j}": val for i, row in enumerate(input_rows) for j, val in enumerate(row)}
-        )
-
+        initialize_table_data("p1_input_", input_rows)
         party = audit.Party(name="party")
         data = serialize_input_table(input_rows, party, "p1_input_")
         agg_func(data, key_col, agg_col)
@@ -50,7 +47,7 @@ class TestTableAgg(unittest.TestCase):
             agg_col: int,
             expected: List[List[int]]
     ):
-        self.run_test(input_rows, key_col, agg_col, aggregate_sum, expected)
+        self.run_test(input_rows, key_col, agg_col, functions.aggregate_sum, expected)
 
     @parameterized.expand([
         (
@@ -71,7 +68,7 @@ class TestTableAgg(unittest.TestCase):
             agg_col: int,
             expected: List[List[int]]
     ):
-        self.run_test(input_rows, key_col, agg_col, aggregate_max, expected)
+        self.run_test(input_rows, key_col, agg_col, functions.aggregate_max, expected)
 
     @parameterized.expand([
         (
@@ -92,7 +89,7 @@ class TestTableAgg(unittest.TestCase):
             agg_col: int,
             expected: List[List[int]]
     ):
-        self.run_test(input_rows, key_col, agg_col, aggregate_min, expected)
+        self.run_test(input_rows, key_col, agg_col, functions.aggregate_min, expected)
 
 
 if __name__ == '__main__':

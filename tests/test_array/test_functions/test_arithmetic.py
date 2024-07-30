@@ -2,7 +2,7 @@ import unittest
 from typing import List
 from nada_dsl import audit
 from parameterized import parameterized
-from nada_data.functions import array
+from nada_data.array import functions
 from tests.utils import serialize_input_array
 
 
@@ -22,7 +22,7 @@ class TestArrayArithmetic(unittest.TestCase):
 
         party = audit.Party(name="party_one")
         output = audit.Output(
-            array.sum_nada_array(
+            functions.sum_nada_array(
                 serialize_input_array(input_arr, party, "p1_input_")
             ),
             "output",

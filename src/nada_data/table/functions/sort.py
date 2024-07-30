@@ -2,7 +2,7 @@ from typing import List, Union
 from nada_dsl import (
     SecretInteger, audit
 )
-from nada_data.functions import utils
+from nada_data import utils
 
 secret_int_types = {SecretInteger, audit.SecretInteger}
 secret_int = Union[*secret_int_types]
