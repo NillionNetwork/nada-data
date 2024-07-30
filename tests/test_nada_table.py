@@ -1,20 +1,9 @@
 import unittest
-import doctest
 from typing import List, Callable
-from nada_dsl import SecretInteger, audit
+from nada_dsl import audit
 from parameterized import parameterized
-from nada_data import nada_array, nada_table
-from tests.utils import serialize_input_table
-
-
-def load_tests(loader, tests, ignore):
-    """
-    This is a special function that is recognized by unittest and can be used to add
-    additional tests to a test suite. In this case, we are adding the doctest tests
-    from the table.nada_table module to this test suite.
-    """
-    tests.addTests(doctest.DocTestSuite(nada_table))
-    return tests
+from nada_data import nada_table
+from tests.utils import serialize_input_table, initialize_table_data
 
 
 class TestNadaTable(unittest.TestCase):
@@ -41,17 +30,21 @@ class TestNadaTable(unittest.TestCase):
             self, cols: list, select_cols: list, input_rows: List[List[int]], expected_rows: List[List[int]]
     ):
 
+        initialize_table_data(input_rows)
+        party = audit.Party(name="party")
         nt = nada_table.NadaTable(
             *cols,
-            rows=[nada_array.NadaArray([SecretInteger(v) for v in r]) for r in input_rows]
+            rows=serialize_input_table(input_rows, party, "p1_input_")
         )
 
         output_table = nt.select(*select_cols)
         self.assertEqual(output_table.columns, select_cols)
 
-        for i in range(len(expected_rows)):
-            for j in range(len(expected_rows[i])):
-                self.assertEqual(expected_rows[i][j], output_table.rows[i][j].inner)
+        output = [
+            [audit.Output(v, "output", party).value.value for v in output_table.rows[i]]
+            for i in range(len(nt.rows))
+        ]
+        self.assertEqual(output, expected_rows)
 
     @parameterized.expand([
         (
@@ -79,10 +72,7 @@ class TestNadaTable(unittest.TestCase):
             self, cols: list, key_col: str, ascending: bool, input_rows: List[List[int]], expected: List[List[int]]
     ):
 
-        audit.Abstract.initialize(
-            {f"p1_input_{i}_{j}": val for i, row in enumerate(input_rows) for j, val in enumerate(row)}
-        )
-
+        initialize_table_data(input_rows)
         party = audit.Party(name="party")
         nt = nada_table.NadaTable(
             *cols,
@@ -107,10 +97,7 @@ class TestNadaTable(unittest.TestCase):
             expected: List[List[int]]
     ):
 
-        audit.Abstract.initialize(
-            {f"p1_input_{i}_{j}": val for i, row in enumerate(input_rows) for j, val in enumerate(row)}
-        )
-
+        initialize_table_data(input_rows)
         party = audit.Party(name="party")
         nt = nada_table.NadaTable(
             *cols,

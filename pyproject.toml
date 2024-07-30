@@ -1,0 +1,19 @@
+[project]
+name = "nada_data"
+version = "0.1.0"
+description = "Tabular data operations with nada_dsl"
+authors = [
+    {name = "Choose K"},
+    {email = "team@choosek.com"}
+]
+dependencies = [
+    "py-nillion-client",
+    "nada-dsl",
+    "nillion-python-helpers",
+    "python-dotenv==1.0.0",
+    "cosmpy>=0.9.2"
+]
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"

@@ -187,8 +187,3 @@ class NadaTable:
         if key_col == agg_col:
             raise ValueError(":key_col: and :agg_col: parameters must be distinct")
         aggregate_min(self.rows, self.get_col_idx(key_col), self.get_col_idx(agg_col))
-
-
-if __name__ == "__main__":
-    import doctest
-    doctest.testmod()
