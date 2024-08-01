@@ -3,7 +3,7 @@ from typing import List
 from nada_dsl import audit
 from parameterized import parameterized
 from nada_data.array import functions
-from tests.utils import serialize_input_array
+from nada_data.array import serialize_input_array
 
 
 class TestArraySort(unittest.TestCase):

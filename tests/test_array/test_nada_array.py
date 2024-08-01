@@ -2,8 +2,9 @@ import unittest
 from nada_dsl import audit
 from parameterized import parameterized
 from typing import List, Dict
-from tests.utils import serialize_input_array, initialize_array_data, initialize_array_data_multi
-from nada_data.array.nada_array import NadaArray
+from nada_data.utils import initialize_array_data, initialize_array_data_multi
+from nada_data import NadaArray
+from nada_data.array import serialize_input_array
 
 
 class TestNadaArray(unittest.TestCase):

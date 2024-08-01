@@ -3,8 +3,8 @@ import doctest
 from typing import List, Callable, Dict
 from nada_dsl import audit
 from parameterized import parameterized
-from nada_data.table import nada_table, NadaTable
-from tests.utils import serialize_input_table, initialize_table_data, initialize_table_data_multi
+from nada_data.table import nada_table, NadaTable, serialize_input_table
+from nada_data.utils import initialize_table_data, initialize_table_data_multi
 
 
 def load_tests(loader, tests, ignore):

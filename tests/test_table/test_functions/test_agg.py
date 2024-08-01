@@ -2,8 +2,8 @@ import unittest
 from typing import List, Callable
 from nada_dsl import audit
 from parameterized import parameterized
-from nada_data.table import functions
-from tests.utils import serialize_input_table, initialize_table_data
+from nada_data.table import functions, serialize_input_table
+from nada_data.utils import initialize_table_data
 
 
 class TestTableAgg(unittest.TestCase):

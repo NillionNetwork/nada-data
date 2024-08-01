@@ -1,3 +1,5 @@
+from typing import List, Dict
+from nada_dsl import audit
 
 
 def next_power_of_two(n: int) -> int:
@@ -20,6 +22,41 @@ def next_power_of_two(n: int) -> int:
         p <<= 1
 
     return p
+
+
+def initialize_array_data(prefix: str, arr: List[int]):
+    audit.Abstract.initialize(
+        {f"{prefix}{i}": arr[i] for i in range(len(arr))}
+    )
+
+
+def initialize_array_data_multi(inputs: Dict[str, List[int]]):
+    audit.Abstract.initialize({
+        f"{party_name}_{i}": inputs[party_name][i]
+        for party_name in inputs.keys()
+        for i in range(len(inputs[party_name]))
+    })
+
+
+def initialize_table_data(prefix: str, arrs: List[List[int]]):
+    audit.Abstract.initialize(
+        {f"{prefix}{i}_{j}": val for i, row in enumerate(arrs) for j, val in enumerate(row)}
+    )
+
+
+def initialize_table_data_multi(inputs: Dict[str, List[List[int]]]):
+    audit.Abstract.initialize({
+        f"{party_name}_{i}_{j}": v
+        for party_name, lst in inputs.items()
+        for i, sublst in enumerate(lst)
+        for j, v in enumerate(sublst)
+    })
+
+
+__all__ = [
+    "initialize_array_data", "initialize_table_data",
+    "initialize_array_data_multi", "initialize_table_data_multi"
+]
 
 
 if __name__ == "__main__":
