@@ -2,12 +2,35 @@ from __future__ import annotations
 import inspect
 from typing import List, Union, Set
 from nada_dsl import (
-    SecretInteger, audit, Party
+    SecretInteger, audit, Input, Literal
 )
 
 
 secret_int_types = {SecretInteger, audit.SecretInteger}
 secret_int = Union[*secret_int_types]
+
+
+def _gather_parties(node):
+    party_attributes = set()
+
+    def traverse(n):
+
+        if isinstance(n, Input):
+            party = getattr(n, 'party')
+            if party is not None:
+                party_attributes.add(party.name)
+            return
+
+        if isinstance(n, Literal):
+            # no parties associated with Literal instances
+            return
+
+        for attr in ['inner', 'left', 'right', 'arg_0', 'arg_1', 'this']:
+            if hasattr(n, attr):
+                traverse(getattr(n, attr))
+
+    traverse(node)
+    return party_attributes
 
 
 class NadaArray:
@@ -39,7 +62,7 @@ class NadaArray:
         """
         Return a string representation of this instance.
         """
-        parties_str = ",".join(sorted([f"'{p.name}'" for p in self._parties]))
+        parties_str = ",".join(sorted([f"'{p}'" for p in self._parties]))
         return f"NadaArray | len={len(self._data)} | parties=[{parties_str}]"
 
     def __repr__(self: NadaArray):
@@ -112,19 +135,27 @@ class NadaArray:
         self._data.insert(index, item)
         self._add_parties(item)
 
+    @staticmethod
+    def _gather_parties(obj: secret_int) -> Set[str]:
+        if isinstance(obj, audit.SecretInteger):
+            return set([p.name for p in obj.parties])
+        if isinstance(obj, SecretInteger):
+            return _gather_parties(obj)
+        return set()
+
     def _update_parties(self: NadaArray):
         """
         Update the set of all Party values for this instance
         """
-        self._parties = {party for obj in self for party in obj.parties}
+        self._parties = {party for obj in self for party in self._gather_parties(obj)}
 
     def _add_parties(self: NadaArray, item: secret_int):
         """
         Add all Party values for some :item: to this instance
         """
-        self._parties = self._parties | set(item.parties)
+        self._parties = self._parties | self._gather_parties(item)
 
-    def get_parties(self: NadaArray) -> Set[Union[Party, audit.Party]]:
+    def get_parties(self: NadaArray) -> Set[str]:
         """
         Return the set of all parties associated with this instance
         """

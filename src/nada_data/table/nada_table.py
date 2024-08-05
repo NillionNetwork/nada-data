@@ -1,8 +1,12 @@
 from __future__ import annotations
 from typing import List, Set, Union
-from nada_dsl import audit, Party
+from nada_dsl import audit, Party, SecretInteger
 from nada_data.array.nada_array import NadaArray
 from nada_data.table.functions import *
+
+
+secret_int_types = {SecretInteger, audit.SecretInteger}
+secret_int = Union[*secret_int_types]
 
 
 class NadaTable:
@@ -25,7 +29,7 @@ class NadaTable:
         Return a string representation of this NadaTable instance
         """
         cols_str = ",".join(f"'{c}'" for c in self.columns)
-        parties_str = ",".join(sorted([f"'{p.name}'" for p in self._parties]))
+        parties_str = ",".join(sorted([f"'{p}'" for p in self._parties]))
         return f"NadaTable | cols=[{cols_str}] | rows={len(self._rows)} | parties=[{parties_str}]"
 
     def __repr__(self: NadaTable) -> str:
