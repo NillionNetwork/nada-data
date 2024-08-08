@@ -26,7 +26,7 @@ The library can be imported in the usual way:
     from nada_data import *
 
 
-The library provides two basic types: ``NadaArray`` and ``NadaTable``. The **NadaArray** type is analogous
+The library provides two basic types: ``NadaArray`` and ``NadaTable``. The ``NadaArray`` type is analogous
 to Python's builtin ``list`` type, and can be created as follows:
 
 .. code-block:: python
@@ -53,7 +53,7 @@ to Python's builtin ``list`` type, and can be created as follows:
     NadaArray | len=2 | parties=['me']
 
 
-For ``NadaArray``, utility functions that are normally available to the ``list`` type:
+Utility functions analogous to those available to the ``list`` type are provided:
 
 .. code-block:: python
 
@@ -92,11 +92,11 @@ column names:
     NadaTable | cols=['a','b'] | rows=2 | parties=['me','new_party']
 
 
-The **NadaTable** type provides relational-style functions that one would expect from something like a SQl table:
+The ``NadaTable`` type provides relational-style functions that one would expect from something like a SQL table:
 
 .. code-block:: python
 
-    # select one or more columns into a new table
+    # construct a new table from one or more columns in an existing one
     col = tbl.select("a")
     >>> col
     NadaTable | cols=['a'] | rows=2 | parties=['me', 'new_party']
