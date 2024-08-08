@@ -1,3 +1,6 @@
+"""
+Sorting functions for use with NadaTable instances
+"""
 from typing import List, Union
 from nada_dsl import (
     SecretInteger, audit
@@ -62,4 +65,10 @@ def _odd_even_sort(
 def odd_even_sort(
         values: List[List[secret_int]], key_col: int, ascending: bool
 ):
+    """
+    Sort the contents of **values** in either ascending or descending order
+
+    :param values: Input table
+    :param ascending: Control ordering on sorted output
+    """
     _odd_even_sort(values, key_col, ascending, 0, utils.next_power_of_two(len(values)))

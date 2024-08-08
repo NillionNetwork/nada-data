@@ -1,3 +1,6 @@
+"""
+Sorting functions for use with NadaArray instances
+"""
 from typing import List, Union
 from nada_dsl import (
     SecretInteger, audit
@@ -55,7 +58,10 @@ def sort_nada_array(
         values: List[secret_int], ascending: bool = True
 ) -> List[secret_int]:
     """
-    Sort the contents of :values: in either ascending or descending order
+    Sort the contents of **values** in either ascending or descending order
+
+    :param values: Input array
+    :param ascending: Control ordering on sorted output
     """
     _odd_even_sort(values, ascending, 0, utils.next_power_of_two(len(values)))
     return values

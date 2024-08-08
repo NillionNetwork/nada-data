@@ -1,3 +1,6 @@
+"""
+Control which resources are directly exported from this module
+"""
 from nada_data.array.functions.arithmetic import *
 from nada_data.array.functions.filter import *
 from nada_data.array.functions.sort import *

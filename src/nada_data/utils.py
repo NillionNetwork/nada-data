@@ -1,3 +1,6 @@
+"""
+Utility functions shared by both the `array` and `table` modules.
+"""
 from typing import List, Dict
 from nada_dsl import audit
 
@@ -12,6 +15,8 @@ def next_power_of_two(n: int) -> int:
     64
     >>> next_power_of_two(-10)
     1
+
+    :param n: Integer to start from
     """
 
     if n <= 0:
@@ -25,12 +30,23 @@ def next_power_of_two(n: int) -> int:
 
 
 def initialize_array_data(prefix: str, arr: List[int]):
+    """
+    Initialize an array of data for some prefix
+
+    :param prefix: Prefix string to assign for each input value.
+    :param arr: Input list of integers
+    """
     audit.Abstract.initialize(
         {f"{prefix}{i}": arr[i] for i in range(len(arr))}
     )
 
 
 def initialize_array_data_multi(inputs: Dict[str, List[int]]):
+    """
+    Initialize multiple arrays of input data for some mapping of input party -> array values.
+
+    :param inputs: A dictionary mapping of party names to arrays of integers.
+    """
     audit.Abstract.initialize({
         f"{party_name}_{i}": inputs[party_name][i]
         for party_name in inputs.keys()
@@ -39,12 +55,23 @@ def initialize_array_data_multi(inputs: Dict[str, List[int]]):
 
 
 def initialize_table_data(prefix: str, arrs: List[List[int]]):
+    """
+    Initialize a two-dimensional array of data for some prefix
+
+    :param prefix: Prefix string to assign for each input value.
+    :param arrs: Input list of lists of integers
+    """
     audit.Abstract.initialize(
         {f"{prefix}{i}_{j}": val for i, row in enumerate(arrs) for j, val in enumerate(row)}
     )
 
 
 def initialize_table_data_multi(inputs: Dict[str, List[List[int]]]):
+    """
+    Initialize multiple tables of input data for some mapping of input party -> table values.
+
+    :param inputs: A dictionary mapping of party names to two-dimensional arrays of integers.
+    """
     audit.Abstract.initialize({
         f"{party_name}_{i}_{j}": v
         for party_name, lst in inputs.items()

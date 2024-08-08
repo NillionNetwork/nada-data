@@ -1,3 +1,6 @@
+"""
+Defines the NadaArray class
+"""
 from __future__ import annotations
 import inspect
 from typing import List, Union, Set
@@ -59,43 +62,26 @@ class NadaArray:
         return iter(self._data)
 
     def __str__(self: NadaArray):
-        """
-        Return a string representation of this instance.
-        """
+
         parties_str = ",".join(sorted([f"'{p}'" for p in self._parties]))
         return f"NadaArray | len={len(self._data)} | parties=[{parties_str}]"
 
     def __repr__(self: NadaArray):
-        """
-        Return a string representation of this instance.
-        """
         return str(self)
 
     def __add__(self: NadaArray, other: Union[NadaArray, List[secret_int]]):
-        """
-        Concatenate this instance with another NadaArray or list of SecretInteger instances
-        """
         return NadaArray(self._data + other._data)
 
     def __setitem__(self: NadaArray, index: int, item: secret_int):
-        """
-        Replace value at :index: of self.data with :item:
-        """
 
         self._check_type(item)
         self._data[index] = item
         self._update_parties()
 
     def __getitem__(self: NadaArray, index: int) -> secret_int:
-        """
-        Return value at :index: from self.data
-        """
         return self._data[index]
 
     def __delitem__(self: NadaArray, index: int):
-        """
-        Remove value at :index: from self._data
-        """
         del self._data[index]
         self._update_parties()
 
@@ -105,7 +91,7 @@ class NadaArray:
         Determine whether :item: is of SecretInteger type
         """
         if type(item) not in secret_int_types:
-            raise TypeError(f"all array values must be of type SecretInteger")
+            raise TypeError("all array values must be of type SecretInteger")
 
     def append(self: NadaArray, item: secret_int):
         """
@@ -138,7 +124,7 @@ class NadaArray:
     @staticmethod
     def _gather_parties(obj: secret_int) -> Set[str]:
         if isinstance(obj, audit.SecretInteger):
-            return set([p.name for p in obj.parties])
+            return {p.name for p in obj.parties}
         if isinstance(obj, SecretInteger):
             return _gather_parties(obj)
         return set()
@@ -157,7 +143,7 @@ class NadaArray:
 
     def get_parties(self: NadaArray) -> Set[str]:
         """
-        Return the set of all parties associated with this instance
+        Return the set of all input parties associated with the data stored by this instance
         """
         return self._parties
 
@@ -168,6 +154,10 @@ def serialize_input_array(
     """
     Construct and return a NadaArray with inputs that match a certain :prefix: and :party:
     ownership. This is intended be used only for testing with the nada_dsl.audit module.
+
+    :param arr: Input array
+    :param party: Party instance to associate with :arr:
+    :param prefix: String to add as prefix to input data names
     """
     return NadaArray(
         audit.SecretInteger(

@@ -1,3 +1,6 @@
+"""
+Aggregation functions for use with NadaTable instances
+"""
 from typing import List, Union, Callable
 from nada_dsl import (
     SecretInteger, audit
@@ -39,12 +42,33 @@ def _aggregate(values: List[List[secret_int]], key_col: int, agg_col: int, agg_t
 
 
 def aggregate_sum(values: List[List[secret_int]], key_col: int, agg_col: int):
+    """
+    Sum the contents of **agg_col** grouped by **key_col** for table **values**
+
+    :param values: Input table
+    :param key_col: Column to group by
+    :param agg_col: Column to sum over
+    """
     _aggregate(values, key_col, agg_col, "sum")
 
 
 def aggregate_max(values: List[List[secret_int]], key_col: int, agg_col: int):
+    """
+    Determine the max value of **agg_col** grouped by **key_col** for table **values**
+
+    :param values: Input table
+    :param key_col: Column to group by
+    :param agg_col: Column to calculate max over
+    """
     _aggregate(values, key_col, agg_col, "max")
 
 
 def aggregate_min(values: List[List[secret_int]], key_col: int, agg_col: int):
+    """
+    Determine the min value of **agg_col** grouped by **key_col** for table **values**
+
+    :param values: Input table
+    :param key_col: Column to group by
+    :param agg_col: Column to calculate min over
+    """
     _aggregate(values, key_col, agg_col, "min")

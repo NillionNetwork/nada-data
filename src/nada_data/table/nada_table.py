@@ -1,8 +1,11 @@
+"""
+Defines the NadaTable class
+"""
 from __future__ import annotations
 from typing import List, Set, Union
 from nada_dsl import audit, Party, SecretInteger
 from nada_data.array.nada_array import NadaArray
-from nada_data.table.functions import *
+from nada_data.table import functions
 
 
 secret_int_types = {SecretInteger, audit.SecretInteger}
@@ -10,6 +13,10 @@ secret_int = Union[*secret_int_types]
 
 
 class NadaTable:
+    """
+    Data structure for representing tables of NadaArray instances. The constructor accepts
+    a comma-separated list of column names along with a list of NadaArray instances.
+    """
     def __init__(
             self: NadaTable,
             *columns: str,
@@ -17,7 +24,7 @@ class NadaTable:
     ):
         self._rows = []
         self._parties = set()
-        self.columns = [c for c in columns]
+        self.columns = list(columns)
         if rows is not None:
             self.set_data(rows)
 
@@ -25,9 +32,7 @@ class NadaTable:
         return len(self._rows)
 
     def __str__(self: NadaTable) -> str:
-        """
-        Return a string representation of this NadaTable instance
-        """
+
         cols_str = ",".join(f"'{c}'" for c in self.columns)
         parties_str = ",".join(sorted([f"'{p}'" for p in self._parties]))
         return f"NadaTable | cols=[{cols_str}] | rows={len(self._rows)} | parties=[{parties_str}]"
@@ -36,30 +41,21 @@ class NadaTable:
         return str(self)
 
     def __setitem__(self: NadaTable, index: int, row: NadaArray):
-        """
-        Replace value at :index: of self._rows with :item:
-        """
 
         self._check_input(row)
         self._rows[index] = row
         self._update_parties()
 
     def __getitem__(self: NadaTable, index: int) -> NadaArray:
-        """
-        Return value at :index: from self._rows
-        """
         return self._rows[index]
 
     def __delitem__(self: NadaTable, index: int):
-        """
-        Remove value at :index: from self._rows
-        """
         del self._rows[index]
         self._update_parties()
 
     def _check_input(self: NadaTable, row: NadaArray):
         """
-        Determine whether :row: is (1) of NadaArray type, and (2) matches length of self.columns
+        Determine whether **row** is (1) of NadaArray type, and (2) matches length of self.columns
         """
 
         if not isinstance(row, NadaArray):
@@ -88,7 +84,7 @@ class NadaTable:
 
     def insert(self: NadaTable, index: int, row: NadaArray):
         """
-        Insert :row: at :index: of self._rows
+        Insert **row** at **index** of self._rows
         """
 
         self._check_input(row)
@@ -103,13 +99,13 @@ class NadaTable:
 
     def _add_parties(self: NadaTable, row: NadaArray):
         """
-        Add all Party values for some :item: to this instance
+        Add all Party values for some **item** to this instance
         """
         self._parties = self._parties | row.get_parties()
 
     def get_parties(self: NadaTable) -> Set[Union[Party, audit.Party]]:
         """
-        Return the set of all parties associated with this instance
+        Return the set of all input parties associated with the data stored by this instance
         """
         return self._parties
 
@@ -126,6 +122,8 @@ class NadaTable:
         Set the names of the columns for this NadaTable instance. Note that no checking
         is done to ensure that the number of columns matches the number of elements in
         each row of the data for this NadaTable instance.
+
+        :param columns: Variadic argument for the names of this instance's columns
         """
 
         self.columns = []
@@ -135,28 +133,41 @@ class NadaTable:
     def set_data(self: NadaTable, data: List[NadaArray]) -> NadaTable:
         """
         Set the rows parameter for this NadaTable instance
+
+        :param data: List of NadaArray instances
         """
         self._rows = []
         self.extend(data)
         return self
 
+    def get_data(self) -> List[NadaArray]:
+        """
+        Get the rows from this instance
+        """
+        return self._rows
+
     def get_col_idx(self: NadaTable, col_name: str) -> int:
         """
-        Get the integer idx for the column with name :col_name:
+        Get the integer idx for the column with name **col_name**
 
         >>> nt = NadaTable('a', 'b')
         >>> nt.get_col_idx('b')
         1
+
+        :param col_name: The name of the column to obtain the index of
         """
         try:
             return self.columns.index(col_name)
-        except ValueError:
-            raise ValueError(f"column {col_name} not in {self}")
+        except ValueError as exc:
+            raise ValueError(f"column {col_name} not in {self}") from exc
 
     def select(self: NadaTable, *cols: str) -> NadaTable:
         """
         Perform basic select operation on this table, returning a new NadaTable with rows
-        consisting of only the specified :cols:
+        consisting of only the specified **cols**
+
+        :param cols: Variadic argument that indicates the names of the columns that will
+        be used to construct the output table
         """
         return NadaTable(
             *cols,
@@ -169,6 +180,8 @@ class NadaTable:
     def concat(self: NadaTable, other: NadaTable) -> NadaTable:
         """
         Return a new NadaTable that is the result of concatenating this instance with another
+
+        :param other: NadaTable instance to concatenate with this instance
         """
 
         if self.columns != other.columns:
@@ -176,37 +189,62 @@ class NadaTable:
 
         return NadaTable(
             *self.columns,
-            rows=self._rows + other._rows
+            rows=self.get_data() + other.get_data()
         )
 
     def sort_by(self: NadaTable, key_col: str, ascending: bool):
         """
-        Sort the rows of this table by :key_col: in either ascending or descending order
+        Sort the rows of this table by **key_col** in either ascending or descending order
+
+        :param key_col: Name of the column to key sorting on
+        :param ascending: Control ordering on output sort
         """
-        odd_even_sort(self._rows, self.get_col_idx(key_col), ascending)
+        functions.odd_even_sort(self._rows, self.get_col_idx(key_col), ascending)
 
     def aggregate_sum(self: NadaTable, key_col: str, agg_col: str):
+        """
+        Sum the contents of **agg_col** grouped by **key_col**
+
+        :param key_col: Column to group by
+        :param agg_col: Column to sum over
+        """
         if key_col == agg_col:
             raise ValueError(":key_col: and :agg_col: parameters must be distinct")
-        aggregate_sum(self._rows, self.get_col_idx(key_col), self.get_col_idx(agg_col))
+        functions.aggregate_sum(self._rows, self.get_col_idx(key_col), self.get_col_idx(agg_col))
 
     def aggregate_max(self: NadaTable, key_col: str, agg_col: str):
+        """
+        Determine the max value of **agg_col** grouped by **key_col**
+
+        :param key_col: Column to group by
+        :param agg_col: Column to calculate max over
+        """
         if key_col == agg_col:
             raise ValueError(":key_col: and :agg_col: parameters must be distinct")
-        aggregate_max(self._rows, self.get_col_idx(key_col), self.get_col_idx(agg_col))
+        functions.aggregate_max(self._rows, self.get_col_idx(key_col), self.get_col_idx(agg_col))
 
     def aggregate_min(self: NadaTable, key_col: str, agg_col: str):
+        """
+        Determine the min value of **agg_col** grouped by **key_col**
+
+        :param key_col: Column to group by
+        :param agg_col: Column to calculate min over
+        """
         if key_col == agg_col:
             raise ValueError(":key_col: and :agg_col: parameters must be distinct")
-        aggregate_min(self._rows, self.get_col_idx(key_col), self.get_col_idx(agg_col))
+        functions.aggregate_min(self._rows, self.get_col_idx(key_col), self.get_col_idx(agg_col))
 
 
 def serialize_input_table(
         arrs: List[List[int]], party: audit.Party, prefix: str
 ) -> List[NadaArray]:
     """
-    Construct and return a NadaTable with inputs that match a certain :prefix: and :party:
+    Construct and return a NadaTable with inputs that match a certain **prefix** and **party**
     ownership. This is intended be used only for testing with the nada_dsl.audit module.
+
+    :param arrs: Input table
+    :param party: Party instance to associate with :arrs:
+    :param prefix: String to add as prefix to input data names
     """
     return [
         NadaArray(
