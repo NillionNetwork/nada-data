@@ -2,7 +2,8 @@
 Defines the NadaTable class
 """
 from __future__ import annotations
-from typing import List, Set, Union
+import copy
+from typing import List, Set, Union, Callable
 from nada_dsl import audit, Party, SecretInteger
 from nada_data.array.nada_array import NadaArray
 from nada_data.table import functions
@@ -173,7 +174,7 @@ class NadaTable:
             *cols,
             rows=[
                 NadaArray(r[i] for i in [self.columns.index(c) for c in cols])
-                for r in self._rows
+                for r in copy.deepcopy(self._rows)
             ]
         )
 
@@ -189,39 +190,61 @@ class NadaTable:
 
         return NadaTable(
             *self.columns,
-            rows=self.get_data() + other.get_data()
+            rows=copy.deepcopy(self.get_data() + other.get_data())
         )
 
-    def sort_by(self: NadaTable, key_col: str, ascending: bool):
+    def sort_by(self: NadaTable, key_col: str, ascending: bool) -> NadaTable:
         """
         Sort the rows of this table by **key_col** in either ascending or descending order
 
         :param key_col: Name of the column to key sorting on
         :param ascending: Control ordering on output sort
         """
-        functions.odd_even_sort(self._rows, self.get_col_idx(key_col), ascending)
 
-    def aggregate_sum(self: NadaTable, key_col: str, agg_col: str):
+        new_rows = copy.deepcopy(self._rows)
+        functions.odd_even_sort(new_rows, self.get_col_idx(key_col), ascending)
+
+        return NadaTable(*self.columns, rows=new_rows)
+
+    def _aggregate(
+            self: NadaTable,
+            key_col: str,
+            agg_col: str,
+            agg_func: Callable[[List[List[secret_int]], int, int], None]
+    ) -> NadaTable:
+        """
+        Perform aggregation function **agg_func** over **agg_col** grouped by **key_col**
+
+        :param key_col: Column to group by
+        :param agg_col: Column to sum over
+        :param agg_func: aggregation function to perform
+        """
+
+        if key_col == agg_col:
+            raise ValueError(":key_col: and :agg_col: parameters must be distinct")
+
+        new_rows = copy.deepcopy(self._rows)
+        agg_func(new_rows, self.get_col_idx(key_col), self.get_col_idx(agg_col))
+
+        return NadaTable(key_col, agg_col, rows=new_rows)
+
+    def aggregate_sum(self: NadaTable, key_col: str, agg_col: str) -> NadaTable:
         """
         Sum the contents of **agg_col** grouped by **key_col**
 
         :param key_col: Column to group by
         :param agg_col: Column to sum over
         """
-        if key_col == agg_col:
-            raise ValueError(":key_col: and :agg_col: parameters must be distinct")
-        functions.aggregate_sum(self._rows, self.get_col_idx(key_col), self.get_col_idx(agg_col))
+        return self._aggregate(key_col, agg_col, functions.aggregate_sum)
 
-    def aggregate_max(self: NadaTable, key_col: str, agg_col: str):
+    def aggregate_max(self: NadaTable, key_col: str, agg_col: str) -> NadaTable:
         """
         Determine the max value of **agg_col** grouped by **key_col**
 
         :param key_col: Column to group by
         :param agg_col: Column to calculate max over
         """
-        if key_col == agg_col:
-            raise ValueError(":key_col: and :agg_col: parameters must be distinct")
-        functions.aggregate_max(self._rows, self.get_col_idx(key_col), self.get_col_idx(agg_col))
+        return self._aggregate(key_col, agg_col, functions.aggregate_max)
 
     def aggregate_min(self: NadaTable, key_col: str, agg_col: str):
         """
@@ -230,9 +253,7 @@ class NadaTable:
         :param key_col: Column to group by
         :param agg_col: Column to calculate min over
         """
-        if key_col == agg_col:
-            raise ValueError(":key_col: and :agg_col: parameters must be distinct")
-        functions.aggregate_min(self._rows, self.get_col_idx(key_col), self.get_col_idx(agg_col))
+        return self._aggregate(key_col, agg_col, functions.aggregate_min)
 
 
 def serialize_input_table(

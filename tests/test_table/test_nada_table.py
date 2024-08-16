@@ -127,11 +127,11 @@ class TestNadaTable(unittest.TestCase):
             *cols,
             rows=serialize_input_table(input_rows, party, "p1_input_")
         )
-        nt.sort_by(key_col, ascending)
+        sorted_table = nt.sort_by(key_col, ascending)
 
         output = [
-            [audit.Output(v, "output", party).value.value for v in nt._rows[i]]
-            for i in range(len(nt._rows))
+            [audit.Output(v, "output", party).value.value for v in sorted_table._rows[i]]
+            for i in range(len(sorted_table._rows))
         ]
 
         self.assertEqual(output, expected)
@@ -152,11 +152,11 @@ class TestNadaTable(unittest.TestCase):
             *cols,
             rows=serialize_input_table(input_rows, party, "p1_input_")
         )
-        agg_func(nt, key_col, agg_col)
+        agged_table = agg_func(nt, key_col, agg_col)
 
         output = [
-            [audit.Output(v, "output", party).value.value for v in nt._rows[i]]
-            for i in range(len(nt._rows))
+            [audit.Output(v, "output", party).value.value for v in agged_table._rows[i]]
+            for i in range(len(agged_table._rows))
         ]
 
         self.assertEqual(output, expected)
