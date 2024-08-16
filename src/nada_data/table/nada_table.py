@@ -223,8 +223,14 @@ class NadaTable:
         if key_col == agg_col:
             raise ValueError(":key_col: and :agg_col: parameters must be distinct")
 
-        new_rows = copy.deepcopy(self._rows)
-        agg_func(new_rows, self.get_col_idx(key_col), self.get_col_idx(agg_col))
+        new_rows = [
+            NadaArray([
+                copy.deepcopy(row[self.get_col_idx(key_col)]),
+                copy.deepcopy(row[self.get_col_idx(agg_col)])
+            ])
+            for row in self.get_data()
+        ]
+        agg_func(new_rows, 0, 1)
 
         return NadaTable(key_col, agg_col, rows=new_rows)
 

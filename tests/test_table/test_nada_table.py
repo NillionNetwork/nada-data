@@ -170,7 +170,7 @@ class TestNadaTable(unittest.TestCase):
         (
                 [[1, 2], [3, 4], [1, 3], [3, 3]],
                 ["a", "b"], "b", "a",
-                [[1, 2], [0, 3], [4, 3], [3, 4]]
+                [[2, 1], [3, 0], [3, 4], [4, 3]]
         ),
     ])
     def test_aggregate_sum(
@@ -194,7 +194,7 @@ class TestNadaTable(unittest.TestCase):
         (
                 [[1, 2], [3, 4], [1, 3], [3, 3]],
                 ["a", "b"], "b", "a",
-                [[1, 2], [0, 3], [3, 3], [3, 4]]
+                [[2, 1], [3, 0], [3, 3], [4, 3]]
         ),
     ])
     def test_aggregate_max(
@@ -218,7 +218,7 @@ class TestNadaTable(unittest.TestCase):
         (
                 [[1, 2], [3, 4], [1, 3], [3, 3]],
                 ["a", "b"], "b", "a",
-                [[1, 2], [0, 3], [1, 3], [3, 4]]
+                [[2, 1], [3, 0], [3, 1], [4, 3]]
         ),
     ])
     def test_aggregate_min(
